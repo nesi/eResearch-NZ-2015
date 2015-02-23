@@ -7,3 +7,5 @@ NeSI contribution to eResearch NZ 2015
 
 A powerpoint template is available in the Template folder.
 The template come in a variety of color and styles. Please stick to one style and color scheme.
+
+A latex template is available in the Template_latex folder.

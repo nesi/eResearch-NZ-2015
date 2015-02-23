@@ -1,0 +1,186 @@
+\documentclass{beamer}
+\usepackage[english,french]{layout}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage{amsmath, soul, color, multicol, type1cm, verbatim, latexsym, dsfont, float, listings,alltt}
+\usepackage[official]{eurosym}
+\usepackage{beamerthemesplit}
+\usetheme{Frankfurt}
+\usefonttheme{professionalfonts}
+\setbeamercovered{transparent}
+%NeSI Colors <-------------------------------------------------------------------------------------
+\usecolortheme{lily}
+\usecolortheme[RGB={47, 68, 71}]{structure} 
+\definecolor{nesidark}{HTML}{2F4447}
+\definecolor{nesilight}{HTML}{CED9DF}
+\definecolor{nesigrey}{gray}{0.7}
+\definecolor{nesilightgrey}{gray}{0.98}
+\definecolor{nesidarkgrey}{gray}{0.3}
+\definecolor{nesiblue}{HTML}{2B9FC2}
+\setbeamercolor{block title}{fg=black,bg=nesigrey}
+\setbeamercolor{block body}{bg=nesilightgrey,fg=nesidarkgrey}
+\setbeamercolor{block body alerted}{bg=white,fg=black}
+\setbeamercolor{alerted text}{bg=white,fg=black}
+%NeSI Title <---------------------------------------------------------------------------------------
+\setbeamerfont{title}{size=\huge}
+\frenchspacing
+\hyphenation{NeSI}
+%NeSI Template parameters <-------------------------------------------------------------------------
+\setbeamertemplate{blocks}[default]
+\useinnertheme{circles}
+\setbeamertemplate{title page}[default][center,rounded=false,shadow=false]
+\newcommand\BackgroundPicture[1]{%
+\setbeamertemplate{background}{%
+\parbox[c][\paperheight]{\paperwidth}{%
+\vfill \hfill \includegraphics[height=0.9\paperheight]{#1}
+\hfill \vfill
+}}}
+
+%Content Starts Here <-------------------------------------------------------------------------------
+\title{Enabling High--Throughput Research on HPC Systems}
+%\subtitle{Computational Science team}
+\author{Dr Fran{\c c}ois Bissey \\ (francois.bissey@canterbury.ac.nz)}
+\date{}
+
+\begin{document}
+
+{
+\setbeamertemplate{background canvas}{\includegraphics[height=0.99\paperheight]{NeSI_img/Slide00.png}} 
+\begin{frame}[plain]
+\vspace{1cm}
+\titlepage
+\end{frame}
+}
+
+
+% This will generate the outline. If you have several topics, uncomment the multicols 
+\begin{frame}
+\frametitle{Outline}
+% \begin{multicols}{2} 
+   \tableofcontents
+% \end{multicols}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Some Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+\frame[t]
+{
+\frametitle{Introduction}
+\begin{block}{Two types of fundamental workflow for HPC}
+\begin{itemize}
+ \item Large distributed memory jobs (MPI)
+ \item High-throughput jobs
+\end{itemize}
+\end{block}
+
+\begin{block}{High-throughput jobs covers}
+\begin{itemize}
+ \item Monte-Carlo simulations
+ \item Parameter space sweeps
+ \item Processing of large data sets
+\end{itemize}
+It is characterised by doing a task over and over again with a different input.
+\end{block}
+}
+
+\section{The Problem}
+
+\frame[t]
+{
+\frametitle{The problem}
+\begin{block}{MPI machines}
+Machine like the Power7 cluster at BlueFern and Fitzroy at NIWA are geared towards distributed memory jobs (MPI).
+\end{block}
+
+\begin{block}{High-throughput job}
+Running high-throughput jobs efficiently on these systems requires a little bit of thinking ahead and care.
+We will "steal" the MPI workflow to achieve this. Machine like Pan in Auckland is geared more towards high-throughput jobs but applying the technics presented could be beneficial on it as well.
+\end{block}
+}
+
+\section{Technical Overview}
+\frame[t]
+{
+\frametitle{Technical Overview}
+ There are three structured approaches to run our jobs on a MPI machine
+\begin{enumerate}
+ \item MPMD
+ \item batcher
+ \item custom (usually a form of the previous two but integrated within your workflow)
+\end{enumerate}
+We will use three case studies to show the problems and the solutions adopted.
+}
+
+\section{Case Studies}
+
+\subsection{presentation}
+\frame[t]{
+\frametitle{Case Studies}
+\begin{block}{Presentation}
+We'll go through the work of three researchers showing various problems and solutions and we'll summarize their pros and cons.
+\begin{enumerate}
+ \item Ehsan's simulations (the flood)
+ \item Nick's network (MPMD in testing)
+ \item Jing Wang: DNA matching (batcher)
+\end{enumerate}
+\end{block}
+}
+\subsection{Eshan's Simulations}
+\frame[t]{
+\frametitle{Ehsan's Simulations}
+Ehsan is a PhD student in computer science. His problem is simulating wireless networks to improve the efficiency of the communication in mobile devices.
+
+\begin{itemize}
+\item first submission to the cluster was 40,000 simulations
+\item done 4 at a time
+\item first reaction: increase the number of simulations he can run (after all they are not big MPI jobs)
+\item Bad idea: the simulations were spread all over the cluster blocking big MPI jobs
+\item developed a custom solution to contain him to a set of nodes
+\item we later found out that it was equivalent to using MPMD
+\end{itemize}
+We now identify high-throughput project quickly and offer them better solutions as soon as possible.
+}
+
+\subsection{Nick's networks}
+\frame[t]{
+\frametitle{Nick's Networks}
+\begin{itemize}
+\item Nick Baker is a PhD student in biological sciences with a background in mathematics. He studies ecological networks (complex food chains).
+
+\item His work focuses on analysing networks to find "keystone" species that are essential to the network. The work is what we call embarassingly parallel, he has to go through a high number of networks and perfoorm his analyses on each and everyone of them.
+
+\item I spotted him on the cluster running running four jobs at a time out of close to a hundred. There was definitely room for improvement. He became a test subject for MPMD
+\end{itemize}
+}
+\frame[t]{
+\frametitle{MPMP: Multiple Program Multiple Data}
+\begin{multicols}{2}
+\begin{figure}
+\includegraphics[scale=0.5]{../smpd_task.pdf}
+\end{figure}
+SMPD: Instances of a program process the data distributed amongst them.
+\begin{figure}
+\includegraphics[scale=0.5]{../mpmd_task.pdf} 
+\end{figure}
+MPMD: Programs, not necessarily identical, process distinct data.
+\end{multicols}
+}
+{
+\setbeamertemplate{background canvas}{\includegraphics[height=0.99\paperheight]{NeSI_img/Slide00.png}} 
+\begin{frame}[plain]
+\begin{center}
+{\Huge Questions \& Answers}
+\end{center}
+\end{frame}
+}
+
+
+\end{document} 
