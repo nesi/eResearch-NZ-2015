@@ -69,8 +69,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Some Examples %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Introduction}
-
+\section{The Background}
+\subsection{Introduction to Molecular Mechanics}
 \frame[t]
 {
 \frametitle{Molecular Mechanics}
@@ -78,12 +78,12 @@
 \item An approximation of a molecule's potential energy using a Newtonian model
 \item Add a time component to get molecular dynamics (MD)
 \item The system is represented in three parts: Coordinates, topology and force field
-\item Coordinates: Where all the particles are (arbitrary frame of reference)
+\item Coordinates: Where all the particles are (relative to each other)
 \item Topology: Which particles are connected to which other particles
-\item What is a force field?
+\item Force fields: What's the deal?
 \end{itemize}
 }
-
+\subsection{Force Fields and Parameterisation}
 \frame[t]
 {
 \frametitle{Force fields}
@@ -93,13 +93,12 @@
 A force field is an approximate mathematical model of the potential energy surface of the system.
 It can be expressed as an equation in \(3N - 6\) variables, where \(N\) is the number of particles.
 }
-
 \frame[t]
 {
 \frametitle{Force fields}
 \begin{block}{Functional form}
 	\begin{itemize}
-		\item The form of the equations used to model the various types of interaction that contribute to the overall potential energy (bond stretching, angle bending, etc.)
+		\item The equations used to model interactions between particles
 		\item All interactions of the same class will use the same basic model (e.g., bonds commonly use a quadratic equation in the manner of Hooke's law)
 	\end{itemize}
 \end{block}
@@ -112,72 +111,106 @@ It can be expressed as an equation in \(3N - 6\) variables, where \(N\) is the n
 \end{block}
 }
 
+\section{The Challenge}
 
-\section{Technical Overview}
 \frame[t]
 {
-\frametitle{Technical Overview}
- There are three structured approaches to run our jobs on a MPI machine
-\begin{enumerate}
- \item MPMD
- \item batcher
- \item custom (usually a form of the previous two but integrated within your workflow)
-\end{enumerate}
-We will use three case studies to show the problems and the solutions adopted.
-}
-
-\section{Case Studies}
-
-\subsection{presentation}
-\frame[t]{
-\frametitle{Case Studies}
-\begin{block}{Presentation}
-We'll go through the work of three researchers showing various problems and solutions and we'll summarize their pros and cons.
-\begin{enumerate}
- \item Ehsan's simulations (the flood)
- \item Nick's network (MPMD in testing)
- \item Jing Wang: DNA matching (batcher)
-\end{enumerate}
+\frametitle{The Case of the Missing Parameters}
+\begin{block}{The Problem}
+\begin{itemize}
+\item The equation for the potential energy is a vast sum of terms
+\item Each term makes use of at least one parameter (usually more than one)
+\item If any parameter in any term is missing, the equation can't be solved!
+\item Parameters don't exist for most molecules.
+\end{itemize}
+\end{block}
+\begin{block}{The Solution}
+	\begin{itemize}
+		\item Parameterise on the fly...
+		\item ...right?
+	\end{itemize}
 \end{block}
 }
-\subsection{Eshan's Simulations}
-\frame[t]{
-\frametitle{Ehsan's Simulations}
-Ehsan is a PhD student in computer science. His problem is simulating wireless networks to improve the efficiency of the communication in mobile devices.
 
+\frame[t]
+{
+\frametitle{The Case of the Missing Parameters}
+{\includegraphics[height=0.3\paperheight]{F-15C.jpg}}
+}
+
+\frame[t]
+{
+\frametitle{The Case of the Missing Parameters}
+{\includegraphics[height=0.3\paperheight]{F-15C.jpg}}
+\linebreak
+\begin{flushright}
+{\includegraphics[height=0.3\paperheight]{bellingham.jpg}}
+\end{flushright}
+}
+
+\section{How We're Tackling It}
+\subsection{Overview}
+\frame[t]
+{
+\frametitle{A Four-Step Approach}
+ Our approach to parameter generation consists of four steps:
+\begin{enumerate}
+ \item Generate: Automated Topology Builder (ATB) http://compbio.biosci.uq.edu/atb/
+ \item Refine: GAMESS-US quantum mechanical calculations
+ \item Assemble: MAGIC
+ \item Test: MD simulations
+\end{enumerate}
+}
+
+\subsection{HPC-powered QM Refinement}
+\frame[t]{
+\frametitle{Refinement}
 \begin{itemize}
-\item first submission to the cluster was 40,000 simulations
-\item done 4 at a time
-\item first reaction: increase the number of simulations he can run (after all they are not big MPI jobs)
-\item Bad idea: the simulations were spread all over the cluster blocking big MPI jobs
-\item developed a custom solution to contain him to a set of nodes
-\item we later found out that it was equivalent to using MPMD
+	\item This is the slow part
+	\item Up to 32 QM calculations per torsional degree of freedom
+	\item The speed of each calculation depends on method and basis set
+	\item Best if the calculations can be done in parallel
 \end{itemize}
-We now identify high-throughput project quickly and offer them better solutions as soon as possible.
 }
 
-\subsection{Nick's networks}
 \frame[t]{
-\frametitle{Nick's Networks}
+\frametitle{Workflow Development}
+\begin{block}{Parallelisation}
+	\begin{itemize}
+		\item Within each calculation: Run GAMESS in parallel (MPI parallelisation)
+		\item Between calculations: Run calculations for different torsional angles simultaneously
+	\end{itemize}
+\end{block}
+\begin{block}{Hardware selection}
+	\begin{itemize}
+		\item Based on fitness for purpose (from benchmarking work)
+		\item Goal: Fast, straightforward workflow
+		\item AIX on POWER6 versus Red Hat on Intel: Tests run on Fitzroy (NIWA HPCF) and Pan (University of Auckland)
+	\end{itemize}
+\end{block}
+}
+
+\frame[t]{
+\frametitle{Results So Far}
 \begin{itemize}
-\item Nick Baker is a PhD student in biological sciences with a background in mathematics. He studies ecological networks (complex food chains).
-
-\item His work focuses on analysing networks to find "keystone" species that are essential to the network. The work is what we call embarassingly parallel, he has to go through a high number of networks and perfoorm his analyses on each and everyone of them.
-
-\item I spotted him on the cluster running running four jobs at a time out of close to a hundred. There was definitely room for improvement. He became a test subject for MPMD
+	\item GAMESS works faster on Fitzroy than on Pan
+	\item However, the GROMOS software (required by another part of the workflow) only compiles on Pan
+	\item Preliminary results suggest Pan is the best facility for this work
+	\item Workflow is still being developed but should facilitate rapid parameterisation of novel molecules
+	\item NeSI CST members are available for consultation regarding machine selection for your workflow
 \end{itemize}
 }
+\section {Wrap-Up}
 \frame[t]{
-\frametitle{MPMP: Multiple Program Multiple Data}
-\begin{multicols}{2}
-\begin{figure}
-\end{figure}
-SMPD: Instances of a program process the data distributed amongst them.
-\begin{figure}
-\end{figure}
-MPMD: Programs, not necessarily identical, process distinct data.
-\end{multicols}
+\frametitle{Acknowledgements}
+\begin{itemize}
+	\item Jane Allison
+	\item Ivan Welsh
+	\item Fran\c{c}ois Bissey
+	\item Fabrice Cantos
+\end{itemize}
 }
+
 {
 \setbeamertemplate{background canvas}{\includegraphics[height=0.99\paperheight]{NeSI_img/Slide00.png}} 
 \begin{frame}[plain]
@@ -186,6 +219,5 @@ MPMD: Programs, not necessarily identical, process distinct data.
 \end{center}
 \end{frame}
 }
-
 
 \end{document} 
