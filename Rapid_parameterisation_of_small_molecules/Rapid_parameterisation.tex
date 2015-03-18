@@ -43,7 +43,7 @@
 \title{Rapid Parameterisation of Small Molecules}
 %\subtitle{Computational Science team}
 \author{Dr Benjamin Roberts \\ (ben.roberts@nesi.org.nz)}
-\date{23 March 2015}
+\date{}
 
 \begin{document}
 
@@ -74,15 +74,29 @@
 \frame[t]
 {
 \frametitle{Molecular Mechanics}
-\begin{itemize}
+\begin{block}{The what and the why}
+	\begin{itemize}
 \item An approximation of a molecule's potential energy using a Newtonian model
 \item Add a time component to get molecular dynamics (MD)
+\item Useful for large systems (thousands of particles or more)
+\item Commonly used in biomolecular simulation, drug design, materials science, etc.
+\end{itemize}
+\end{block}
+}
+
+\frame[t]
+{
+\frametitle{Molecular Mechanics}
+\begin{block}{The how}
+	\begin{itemize} 
 \item The system is represented in three parts: Coordinates, topology and force field
 \item Coordinates: Where all the particles are (relative to each other)
 \item Topology: Which particles are connected to which other particles
 \item Force fields: What's the deal?
 \end{itemize}
+\end{block}
 }
+
 \subsection{Force Fields and Parameterisation}
 \frame[t]
 {
@@ -99,7 +113,8 @@ It can be expressed as an equation in \(3N - 6\) variables, where \(N\) is the n
 \begin{block}{Functional form}
 	\begin{itemize}
 		\item The equations used to model interactions between particles
-		\item All interactions of the same class will use the same basic model (e.g., bonds commonly use a quadratic equation in the manner of Hooke's law)
+		\item All interactions of the same class will use the same basic model
+		(e.g., bonds commonly use a quadratic equation in the manner of Hooke's law of spring elasticity)
 	\end{itemize}
 \end{block}
 \begin{block}{Parameters}
@@ -195,7 +210,7 @@ It can be expressed as an equation in \(3N - 6\) variables, where \(N\) is the n
 \begin{itemize}
 	\item GAMESS works faster on Fitzroy than on Pan
 	\item However, the GROMOS software (required by another part of the workflow) only compiles on Pan
-	\item Preliminary results suggest Pan is the best facility for this work
+	\item Preliminary results suggest Fitzroy is the best facility for this work, with small amounts of time needed on Pan at the end
 	\item Workflow is still being developed but should facilitate rapid parameterisation of novel molecules
 	\item NeSI CST members are available for consultation regarding machine selection for your workflow
 \end{itemize}
