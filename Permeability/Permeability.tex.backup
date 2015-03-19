@@ -177,6 +177,14 @@ MESO}
 \end{block}
 }
 
+\frame[t,shrink=10]{
+\frametitle{Macro scale}
+\includegraphics[width=0.4\textwidth]{_img/textile}
+\includegraphics[width=0.4\textwidth]{_img/TextileModel}
+
+}
+
+
 \frame[t]{
 \frametitle{Meso and Macro}
 \begin{itemize}
@@ -236,20 +244,34 @@ The different steps have different requirements:}
 \end{block}
 }
 \frame[t]{
-\frametitle{Experiments  }
+\frametitle{Experiment}
 \begin{figure}
-\includegraphics[scale=0.5]{_img/BR-3}
+\includegraphics[width=0.2\textwidth]{_img/2D-model}
+\includegraphics[width=0.3\textwidth]{_img/experiment}
 \end{figure}
 \begin{block}{
-The different steps have different requirements:}
+2D in plance single layer}
 \begin{itemize}
- \item TexGen, Hypermesh and C\# only run serial.
- \item Abaqus and ANSYS can run parallel.
- \item Solution: 6 different SLURM jobs with dependencies. 
+ \item Different thicknesses: 1.2, 0.9, 0.7\,mm
+ \item Different volume fractions:0.25, 0.34, 0.47\,\%
 \end{itemize}
 \end{block}
 }
+\frame[t]{
+\frametitle{Results}
+\begin{figure}
+\includegraphics[width=\textwidth]{_img/results}
+\end{figure}
+}
 
+{
+\setbeamertemplate{background canvas}{\includegraphics[height=0.99\paperheight]{NeSI_img/Slide00.png}} 
+\begin{frame}[plain]
+\begin{center}
+{\Huge Questions \& Answers}
+\end{center}
+\end{frame}
+}
 
 
 \end{document} 
